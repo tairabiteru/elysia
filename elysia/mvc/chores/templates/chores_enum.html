@@ -1,0 +1,6 @@
+{% for chore in unfinished %}
+<li hx-trigger="click" hx-swap="innerHTML" hx-target="#chore_list" hx-post="{{ chore.id }}/accomplish" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>{{ chore }}</li>
+{% endfor %}
+{% for chore in finished %}
+<li class="checked">{{ chore }}</li>
+{% endfor %}

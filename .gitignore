@@ -1,0 +1,12 @@
+**/__pycache__/**
+**/migrations/**
+conf.toml
+elysia.sh
+pidfile
+Pipfile.lock
+db_backups/**
+uploads/**
+assets/font/**
+bin/**
+static/admin/**
+elysia.db
