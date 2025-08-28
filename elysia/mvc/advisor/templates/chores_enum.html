@@ -2,5 +2,5 @@
 <li hx-trigger="click" hx-swap="innerHTML" hx-target="#chore_list" hx-post="{{ chore.id }}/accomplish" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>{{ chore }}</li>
 {% endfor %}
 {% for chore in finished %}
-<li class="checked">{{ chore }}</li>
+<li class="checked">{{ chore }} - Last done: {{ chore.last_acc_shorthand }}</li>
 {% endfor %}

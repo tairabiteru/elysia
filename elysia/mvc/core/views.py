@@ -26,3 +26,8 @@ async def index(request):
         'version': f"v{request.bot.conf.version} '{request.bot.conf.version_tag}'",
         'display_admin': authenticated or uid == conf.owner_id
     }
+
+
+@template("oronyx.html")
+async def oronyx(_):
+    return {}

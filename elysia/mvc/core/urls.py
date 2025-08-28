@@ -18,7 +18,7 @@ from django.views.generic.base import RedirectView
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import index, auth
+from .views import index, auth, oronyx
 from ...core.conf import Config
 
 
@@ -33,8 +33,9 @@ admin.site.site_header = f"{conf.name} Administration"
 
 urlpatterns = [
     path("", index),
+    path("oronyx", oronyx),
     path("auth/", auth),
-    path("chores/", include("elysia.mvc.chores.urls")),
+    path("advisor/", include("elysia.mvc.advisor.urls")),
     path("admin/", admin.site.urls),
     path('favicon.ico', favicon),
 ]

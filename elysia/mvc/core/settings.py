@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "elysia.mvc.discord",
-    "elysia.mvc.chores",
+    "elysia.mvc.advisor",
     "elysia.mvc.threats"
 ]
 

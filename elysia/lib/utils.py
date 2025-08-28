@@ -264,3 +264,34 @@ def strfdelta_long(
         else:
             output += f" {component}"
     return output.strip()
+
+
+def get_approx_timedelta(delta: datetime.timedelta) -> str:
+    t = delta.total_seconds()
+
+    if 0 <= t < 60:
+        return "a few moments ago"
+    elif 60 <= t < 3600:
+        m = int(t // 60)
+        s = "" if m == 1 else "s"
+        return f"{m} minute{s} ago"
+    elif 3600 <= t < 86400:
+        h = int(t // 3600)
+        s = "" if h == 1 else "s"
+        return f"{h} hour{s} ago"
+    elif 86400 <= t < 604800:
+        d = int(t // 86400)
+        s = "" if d == 1 else "s"
+        return f"{d} day{s} ago"
+    elif 604800 <= t < 2592000:
+        w = int(t // 604800)
+        s = "" if w == 1 else "s"
+        return f"{w} week{s} ago"
+    elif 2592000 <= t < 31536000:
+        m = int(t // 2592000)
+        s = "" if m == 1 else "s"
+        return f"{m} month{s} ago"
+    else:
+        y = int(t // 31536000)
+        s = "" if y == 1 else "s"
+        return f"{y} year{s} ago"

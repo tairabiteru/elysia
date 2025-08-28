@@ -10,7 +10,7 @@ from .log_base import get_base_logger
 
 logger = get_base_logger()
 
-__VERSION__ : str = "0.1.0"
+__VERSION__ : str = "0.3.0"
 __TAG__: str = "Hopeful Humanitarian"
 
 DEFAULTS = {

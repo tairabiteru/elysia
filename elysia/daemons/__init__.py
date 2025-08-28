@@ -2,7 +2,7 @@ import hikari
 
 from ..core.conf import Config
 from ..core.log import logging
-from .chores import chore_daemon
+from .advisor import chore_daemon, reminder_daemon
 
 
 conf = Config.load()
@@ -10,7 +10,8 @@ logger = logging.getLogger(conf.name).getChild("daemons")
 
 
 __all__ = [
-    chore_daemon
+    chore_daemon,
+    reminder_daemon
 ]
 
 

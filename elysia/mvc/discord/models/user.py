@@ -3,6 +3,7 @@ from django.db import models
 import typing as t
 
 from .base import DiscordBaseModel
+from ...core.fields import TimezoneField
 from ..fields import UserIDField
 from ....lib.permissions import PermissionState
 
@@ -17,6 +18,7 @@ class User(DiscordBaseModel):
     chore_daemon = models.BooleanField(default=False)
     notify_times = models.TextField(default="", blank=True)
     last_notify = models.DateTimeField(default=epoch)
+    timezone = TimezoneField()
 
     @property
     def obj(self):

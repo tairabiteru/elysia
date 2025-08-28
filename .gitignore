@@ -10,3 +10,4 @@ assets/font/**
 bin/**
 static/admin/**
 elysia.db
+favicon.ico

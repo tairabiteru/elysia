@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/index.css"></link>
+    <script src="https://kit.fontawesome.com/db8c487bb7.js" crossorigin="anonymous"></script>
+  </head>
+
+  <div id="nav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">&times;</a>
+    <a href="/chores">Chores</a>
+    {% if display_admin %}<a href="/admin">Administrative Backend</a>{% endif %}
+  </div>
+
+  <div id="main">
+    <body>
+        <div class="avatarcard" style="padding: 20px;">
+            <h2>About Time Strings</h2>
+                Elysia is powered by a scheduler system called <strong>Oronyx</strong>, (which is <a href="https://github.com/tairabiteru/oronyx">open source</a>) and is responsible for the concept of a "time string." Essentially, it's a piece of English text which can be interpreted into some future time. Since it's English, it needs little explanation I feel, so I think it's best to lead with examples of valid time strings.<br/>
+<code style="white-space: pre;">
+every 2 days
+every 1 week at 9:00
+every 12 minutes
+everyday at 12:00
+at 17:30
+every tuesday
+every friday at 23:45
+on the last day of the month
+on the last day of the month at 1:45:30
+1 week before the last day of the month at 12:30
+4 days before the lasy day of the month
+every year on 1/1
+every year on 7/4 at 20:30
+on day 5 of each month
+on day 15 of each month at 8:30
+</code><br/>
+            More or less the numbers and some units can be switched out as you like. Notable though is that the syntax must match pretty closely. No capital letters are allowed. Finally, if you find a different format of string you'd like supported, please let me know. I'd love to add more functionality to Oronyx.
+            <br/>  
+            <br/>
+            <button class="optionsbutton" onclick="toggleNav()"><i class="fas fa-bars"></i></button><br>
+        </div>
+    </body>
+  </div>
+  <script src="/static/js/index.js"></script>
+</html>

@@ -1,0 +1,14 @@
+<li style="border-bottom: 3px solid white;">
+    <div class="li_text">New Reminder</div>
+    <input type="text" name="rule" placeholder="every 3 days" id="new_rule" hx-post="/advisor/eval_time_string">
+    <input type="text" name="text" placeholder="Eat my vegetables" id="new_name">
+    <input class="reminder_button create" type="button" hx-include="[name='text'], [name='rule']" hx-trigger="click" hx-swap="innerHTML" hx-target="#reminder_list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="reminders/create" value="Create">
+</li>
+{% for reminder in reminders %}
+<li>
+    <div class="li_text">{{ reminder.rule }}: </div>
+    <div class="li_text">{{ reminder.text }}</div>
+    <input class="reminder_button recurring" type="button" hx-trigger="click" hx-swap="innerHTML" hx-target="#reminder_list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="reminders/{{ reminder.id }}/alter/toggle_recurring" {% if reminder.recurring %}value="Recurring"{% else %}value="Once"{% endif %}>
+    <input class="reminder_button delete" type="button" hx-trigger="click" hx-swap="innerHTML" hx-target="#reminder_list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="reminders/{{ reminder.id }}/alter/delete" value="X"> 
+</li>
+{% endfor %}

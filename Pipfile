@@ -28,6 +28,6 @@ anytree = "*"
 plotly = "*"
 numpy = "*"
 cryptography = "*"
-nintab = {git = "https://github.com/tairabiteru/nintab.git"}
+oronyx = {git = "https://github.com/tairabiteru/oronyx.git"}
 
 [dev-packages]
