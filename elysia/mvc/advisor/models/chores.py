@@ -59,16 +59,17 @@ class Chore(DiscordBaseModel):
         last = self.get_last_accomplishment()
         if not last:
             return True
-        future = oronyx.get_future(last, self.frequency)
-        return timezone.localtime() > future
+        
+        timeline = oronyx.get_timeline(last, self.frequency)
+        return timezone.localtime() > timeline[0]
     
     async def aneeds_doing(self) -> bool:
         last = await self.aget_last_accomplishment()
         if not last:
             return True
         
-        future = oronyx.get_future(last, self.frequency)
-        return timezone.localtime() > future
+        timeline = oronyx.get_timeline(last, self.frequency)
+        return timezone.localtime() > timeline[0]
     
     async def prefetch(self) -> None:
         self._last_accomplishment = await self.aget_last_accomplishment()
@@ -103,7 +104,7 @@ class Chore(DiscordBaseModel):
 
 class Accomplishment(BaseAsyncModel):
     user = models.ForeignKey("discord.User", on_delete=models.CASCADE)
-    utc_timestamp = models.DateTimeField(auto_now_add=True)
+    utc_timestamp = models.DateTimeField()
 
     def __str__(self) -> str:
         return f"{self.user} accomplished at {self.timestamp}"
@@ -111,6 +112,20 @@ class Accomplishment(BaseAsyncModel):
     @property
     def timestamp(self) -> datetime.datetime:
         return self.utc_timestamp.astimezone(conf.timezone)
+    
+    async def asave(self, *args, **kwargs):
+        try:
+            await Accomplishment.objects.aget(id=self.id)
+        except Accomplishment.DoesNotExist:
+            self.utc_timestamp = timezone.localtime()
+        return await super().asave(*args, **kwargs)
+    
+    def save(self, *args, **kwargs):
+        try:
+            Accomplishment.objects.get(id=self.id)
+        except Accomplishment.DoesNotExist:
+            self.utc_timestamp = timezone.localtime()
+        return super().save(*args, **kwargs)
 
 
 class Notification(BaseAsyncModel):

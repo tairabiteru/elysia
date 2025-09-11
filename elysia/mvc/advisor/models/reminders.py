@@ -52,7 +52,7 @@ class Reminder(DiscordBaseModel):
     
     @property
     def future(self) -> datetime.datetime:
-        return oronyx.get_future(self.local_last_notify, self.rule)
+        return oronyx.get_timeline(self.local_last_notify, self.rule)[0]
     
     @property
     def local_last_notify(self) -> datetime.datetime:

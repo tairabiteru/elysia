@@ -54,16 +54,12 @@ class DiscordEventHandler:
             await role.adelete()
 
     @staticmethod
-    async def run_model_update(bot):
-        for _, user in bot.cache.get_users_view().items():
-            try:
-                await User.objects.aget(id=user.id)
-            except User.DoesNotExist:
-                user = User(id=user.id)
-                await user.asave()
-        
+    async def run_model_update(bot):    
         guilds = []
-        for _, guild in bot.cache.get_guilds_view().items():
+        async for guild in bot.rest.fetch_my_guilds():
+            async for member in bot.rest.fetch_members(guild):
+                _, _ = await User.objects.aget_or_create(id=member.id)
+                
             guilds.append(guild.id)
             try:
                 await Guild.objects.aget(id=guild.id)
@@ -96,7 +92,7 @@ class DiscordEventHandler:
                     type = 'GUILD_VOICE'
                 else:
                     continue
-                guild = await Guild.objects.aget(id=channel.guild_id, bot=bot, resolve=False)
+                guild, _ = await Guild.objects.aget_or_create(id=channel.guild_id, bot=bot, resolve=False)
                 channel = Channel(id=channel.id, type=type, guild=guild)
                 await channel.asave()
         

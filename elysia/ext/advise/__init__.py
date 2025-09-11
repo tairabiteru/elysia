@@ -35,8 +35,8 @@ class RemindCommand(
     
     @lightbulb.invoke
     async def invoke(self, ctx: lightbulb.Context, user: User):
-        scheduler = oronyx.get_scheduler(self.time)
-        if scheduler is None:
+        timeline = oronyx.get_blank_timeline(self.time)
+        if timeline is None:
             out = f"Invalid time string: `{self.time}`."
             out += f"\nTo view examples of valid time strings, visit https://{conf.mvc.allowed_hosts[0]}/oronyx."
             return await ctx.respond(out)

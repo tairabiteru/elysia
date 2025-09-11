@@ -1,11 +1,12 @@
 import datetime
 from django.db import models
-import typing as t
+import zoneinfo
 
 from .base import DiscordBaseModel
 from ...core.fields import TimezoneField
 from ..fields import UserIDField
 from ....lib.permissions import PermissionState
+from ....lib.utils import utcnow
 
 
 epoch = datetime.datetime(year=1970, month=1, day=1, hour=0, minute=0, second=0)
@@ -19,6 +20,10 @@ class User(DiscordBaseModel):
     notify_times = models.TextField(default="", blank=True)
     last_notify = models.DateTimeField(default=epoch)
     timezone = TimezoneField()
+
+    @property
+    def localnow(self) -> datetime.datetime:
+        return utcnow().astimezone(zoneinfo.ZoneInfo(self.timezone))
 
     @property
     def obj(self):

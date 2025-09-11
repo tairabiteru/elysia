@@ -26,9 +26,9 @@ async def chore_daemon(bot: hikari.GatewayBot) -> None:
 
         for time in notify_times:
             last = user.last_notify.astimezone(timezone.get_current_timezone())
-            future = oronyx.get_future(last, time)
+            timeline = oronyx.get_timeline(last, time)
 
-            if future < now:
+            if timeline[0] < now:
                 unfinished, _ = await Chore.get_split_chores(user)
 
                 if any(unfinished):
