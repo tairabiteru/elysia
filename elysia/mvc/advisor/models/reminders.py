@@ -14,30 +14,31 @@ conf = Config.load()
 
 
 class Reminder(DiscordBaseModel):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey("discord.User", on_delete=models.CASCADE)
     rule = models.CharField(max_length=256)
-    utc_last_notify = models.DateTimeField(default=None, null=True, blank=True)
+    utc_last_notify = models.DateTimeField(default=timezone.localtime)
     recurring = models.BooleanField(default=False)
     text = models.TextField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._timezone: zoneinfo.ZoneInfo | None = None
-
+        self._timezone: str | None = None
+        
     def save(self, *args, **kwargs):
-        if self.utc_last_notify is None:
-            self.utc_last_notify = timezone.localtime()
-        return super().save(*args, *kwargs)
+        if not oronyx.get_future_obj(self.rule):
+            raise ValueError(f"Invalid future: '{self.rule}'")
+        return super().save(*args, **kwargs)
     
     async def asave(self, *args, **kwargs):
-        if self.utc_last_notify is None:
-            self.utc_last_notify = timezone.localtime()
+        if not oronyx.get_future_obj(self.rule):
+            raise ValueError(f"Invalid future: '{self.rule}'")
         return await super().asave(*args, **kwargs)
     
     @property
     def timezone(self) -> zoneinfo.ZoneInfo:
         if self._timezone is not None:
-            return self._timezone
+            return zoneinfo.ZoneInfo(self._timezone)
         raise RuntimeError("Prefetch not called.")
 
     def get_embed(self) -> hikari.Embed:
@@ -46,17 +47,17 @@ class Reminder(DiscordBaseModel):
         e.set_thumbnail("https://storage.needpix.com/rsynced_images/clock-2690491_1280.png")
 
         if self.recurring is True:
-            e.add_field("Next Reminder", self.future)
+            e.add_field("Next Reminder", str(self.future))
 
         return e
     
     @property
     def future(self) -> datetime.datetime:
-        return oronyx.get_timeline(self.local_last_notify, self.rule)[0]
+        return oronyx.get_future(self.local_last_notify, self.rule)
     
     @property
     def local_last_notify(self) -> datetime.datetime:
-        return self.utc_last_notify.astimezone(zoneinfo.ZoneInfo(self.timezone))
+        return self.utc_last_notify.astimezone(self.timezone)
     
     async def prefetch(self) -> Reminder:
         r = await Reminder.objects.select_related("user").aget(id=self.id)

@@ -1,17 +1,29 @@
+import datetime
 from django.http import HttpRequest, HttpResponse
 import oronyx
+import zoneinfo
 
 from ..core.utils import template
 from ..core.oauth2 import require_auth
-from .models import Chore, Accomplishment, Reminder
+from .models import Chore, Accomplishment, Reminder, Task
 from ..discord.models import User
 
 
 async def oronyx_eval(request: HttpRequest) -> HttpResponse:
     rule = request.POST['rule']
-    scheduler = oronyx.get_scheduler(rule)
-    if scheduler:
-        return HttpResponse(scheduler.regex)
+    eval_type = request.POST['eval_type']
+    
+    if eval_type == "timeline":
+        out = oronyx.get_blank_timeline(rule)
+    elif eval_type == "future":
+        out = oronyx.get_future_obj(rule)
+    elif eval_type == "past":
+        out = oronyx.get_past_obj(rule)
+    else:
+        raise ValueError(f"eval_type must be one of 'future', 'past', or 'timeline'.")
+    
+    if out:
+        return HttpResponse("OK")
     else:
         return HttpResponse("null")
 
@@ -23,7 +35,7 @@ async def chores(request: HttpRequest) -> dict:
     user, _ = await User.objects.aget_or_create(id=uid)
     user.attach_bot(request.bot) # type: ignore
     await user.aresolve_all()
-    return {'avatar_url': user.obj.avatar_url} # type: ignore
+    return {'avatar_url': user.obj.display_avatar_url} # type: ignore
 
 
 @require_auth
@@ -55,7 +67,8 @@ async def reminders(request: HttpRequest) -> dict:
     user, _ = await User.objects.aget_or_create(id=uid)
     user.attach_bot(request.bot) # type: ignore
     await user.aresolve_all()
-    return {'avatar_url': user.obj.avatar_url} # type: ignore
+
+    return {'avatar_url': user.obj.display_avatar_url} # type: ignore
 
 
 @require_auth
@@ -72,7 +85,7 @@ async def get_reminders(request: HttpRequest) -> dict:
 
 
 @require_auth
-async def toggle_recurring(request: HttpRequest, reminder_id: int) -> HttpResponse:
+async def toggle_recurring(request: HttpRequest, reminder_id: int) -> dict:
     reminder = await Reminder.objects.aget(id=reminder_id)
     reminder.recurring = not reminder.recurring
     await reminder.asave()
@@ -81,7 +94,7 @@ async def toggle_recurring(request: HttpRequest, reminder_id: int) -> HttpRespon
 
 
 @require_auth
-async def delete_reminder(request: HttpRequest, reminder_id: int) -> HttpResponse:
+async def delete_reminder(request: HttpRequest, reminder_id: int) -> dict:
     reminder = await Reminder.objects.aget(id=reminder_id)
     await reminder.adelete()
 
@@ -89,7 +102,7 @@ async def delete_reminder(request: HttpRequest, reminder_id: int) -> HttpRespons
 
 
 @require_auth
-async def create_reminder(request: HttpRequest) -> HttpResponse:
+async def create_reminder(request: HttpRequest) -> dict:
     uid = request.session.get("uid")
     user = await User.objects.aget(id=uid)
     
@@ -103,4 +116,68 @@ async def create_reminder(request: HttpRequest) -> HttpResponse:
 
     await reminder.asave()
     return await get_reminders(request)
+
+
+@require_auth
+@template("tasks.html")
+async def tasks(request: HttpRequest) -> dict:
+    uid = request.session['uid']
+    user, _ = await User.objects.aget_or_create(id=uid)
+    user.attach_bot(request.bot) # type: ignore
+    await user.aresolve_all()
+
+    return {'avatar_url': user.obj.display_avatar_url} # type: ignore
+
+
+@require_auth
+@template("tasks_enum.html")
+async def get_tasks(request: HttpRequest) -> dict:
+    uid = request.session.get("uid")
+    user = await User.objects.aget(id=uid)
+    
+    tasks = []
+    later_tasks = []
+    async for task in Task.objects.filter(user=user):
+        if task.is_later:
+            later_tasks.append(task)
+        else:
+            tasks.append(task)
+
+    return {'tasks': tasks, 'later_tasks': later_tasks}
+
+
+@require_auth
+async def delete_task(request: HttpRequest, task_id: int) -> dict:
+    task = await Task.objects.aget(id=task_id)
+    await task.adelete()
+
+    return await get_tasks(request)
+
+
+@require_auth
+async def create_task(request: HttpRequest) -> dict:
+    uid = request.session.get("uid")
+    user = await User.objects.aget(id=uid)
+    
+    name = request.POST['text']
+    notify = request.POST['rule']
+    due_date = request.POST['due_date']
+    due_time = request.POST['due_time'] if request.POST['due_time'] else "00:00"
+    
+    utc_due_date = datetime.datetime.strptime(
+        f"{due_date}T{due_time}",
+        "%Y-%m-%dT%H:%M"
+    )
+    utc_due_date = utc_due_date.replace(tzinfo=zoneinfo.ZoneInfo(user.timezone))
+    utc_due_date = utc_due_date.astimezone(zoneinfo.ZoneInfo("UTC"))
+    
+    task = Task(
+        user=user,
+        name=name,
+        notify=notify,
+        utc_due_date=utc_due_date
+    )
+
+    await task.asave()
+    return await get_tasks(request)
 

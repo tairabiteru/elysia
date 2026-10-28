@@ -16,6 +16,7 @@ conf = Config.load()
 
 
 class Chore(DiscordBaseModel):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=128)
     frequency = models.CharField(max_length=256)
     accomplishments = models.ManyToManyField("Accomplishment", blank=True)
@@ -103,6 +104,7 @@ class Chore(DiscordBaseModel):
 
 
 class Accomplishment(BaseAsyncModel):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey("discord.User", on_delete=models.CASCADE)
     utc_timestamp = models.DateTimeField()
 

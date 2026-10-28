@@ -1,0 +1,26 @@
+<li style="border-bottom: 3px solid white;">
+    <div class="li_text">New Task</div>
+    <input type="hidden" name="eval_type" value="past" id="eval_type">
+    <input type="text" name="text" placeholder="Go to the doctor" id="new_text">
+    <input type="text" name="rule" placeholder="2 days before" id="new_notify" hx-post="/advisor/eval_time_string" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-include="#eval_type">
+    <input type="date" name="due_date" id="new_due_date">
+    <input type="time" name="due_time" id="new_due_time">
+    <input class="task_button create" type="button" hx-include="[name='text'], [name='rule'], [name='due_date'], [name='due_time']" hx-trigger="click" hx-swap="innerHTML" hx-target="#task_list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="tasks/create" value="Create">
+</li>
+{% for task in tasks %}
+<li>
+    <div class="li_text">{{ task.name }}: </div>
+    <div class="li_text">{{ task.notify }}</div>
+    <div class="li_text">{{ task.utc_due_date }}</div>
+    <input class="task_button delete" type="button" hx-trigger="click" hx-swap="innerHTML" hx-target="#task_list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="tasks/{{ task.id }}/alter/delete" value="X"> 
+</li>
+{% endfor %}
+<h3>Later:</h3>
+{% for task in later_tasks %}
+<li>
+    <div class="li_text">{{ task.name }}: </div>
+    <div class="li_text">{{ task.notify }}</div>
+    <div class="li_text">{{ task.utc_due_date }}</div>
+    <input class="task_button delete" type="button" hx-trigger="click" hx-swap="innerHTML" hx-target="#task_list" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-post="tasks/{{ task.id }}/alter/delete" value="X"> 
+</li>
+{% endfor %}

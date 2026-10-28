@@ -10,7 +10,7 @@ from .log_base import get_base_logger
 
 logger = get_base_logger()
 
-__VERSION__ : str = "0.4.0"
+__VERSION__ : str = "0.7.0"
 __TAG__: str = "Hopeful Humanitarian"
 
 DEFAULTS = {
@@ -63,14 +63,14 @@ class BaseConfig:
                 continue
             try:
                 value = d.pop(name)
-                
+
                 try:
                     sub_fields = getattr(cls, "_sub_fields")
                 except AttributeError:
                     sub_fields = []
-                
+
                 if name in sub_fields:
-                
+
                     args.append(field.type._dict_load(value))
                 else:
                     try:
@@ -83,7 +83,7 @@ class BaseConfig:
         if d:
             fields = ", ".join(d.keys())
             raise RuntimeError(f"Unknown fields {fields} detected in config for {cls.__name__}.")
-        
+
         return cls(*args)
 
 
@@ -132,31 +132,31 @@ class GeneralConfig(BaseConfig):
     mvc: MVCConfig
 
     _sub_fields: t.Tuple[str, ...] = ("logging", "mvc", "voice", )
-    
+
     @property
     def version(self) -> str:
         return __VERSION__
-    
+
     @property
     def version_tag(self) -> str:
         return __TAG__
-    
+
     @property
     def root_dir(self) -> pathlib.Path:
         return pathlib.Path(__file__).resolve().parent.parent.parent
-    
+
     @property
     def log_dir(self) -> pathlib.Path:
         return self.logs
-    
+
     @property
     def asset_dir(self) -> pathlib.Path:
         return self.root_dir / "assets/"
-    
+
     @property
     def bin_dir(self) -> pathlib.Path:
         return self.root_dir / "bin/"
-    
+
     @property
     def outfacing_url(self) -> str:
         return self.mvc.allowed_hosts[0]
